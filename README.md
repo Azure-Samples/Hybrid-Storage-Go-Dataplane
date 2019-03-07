@@ -4,7 +4,7 @@ platforms: GO
 author: seyadava
 ---
 
-# Hybrid-Compute-GO-Create-VM
+# Hybrid-Storage-GO-Dataplane
 
 The code provided shows how to do the following:
 
@@ -27,7 +27,7 @@ check out the `main()` function in [app.go](app.go).
 4.  Clone the repository.
 
     ```
-    git clone https://github.com/Azure-Samples/Hybrid-Compute-Go-Create-VM.git
+    git clone https://github.com/Azure-Samples/Hybrid-Storage-Go-Dataplane.git
     ```
 
 5.  Create a [service principal using a certificate](https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-create-service-principals#create-a-service-principal-using-a-certificate) to work against AzureStack. Make sure your service principal has [contributor/owner role](https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-create-service-principals#assign-role-to-service-principal) on your subscription.
