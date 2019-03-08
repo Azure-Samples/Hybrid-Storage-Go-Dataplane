@@ -32,7 +32,9 @@ check out the `main()` function in [app.go](app.go).
 
 5.  Create a [service principal using a certificate](https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-create-service-principals#create-a-service-principal-using-a-certificate) to work against AzureStack. Make sure your service principal has [contributor/owner role](https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-create-service-principals#assign-role-to-service-principal) on your subscription.
 
-6.  Fill in and export these environment variables into your current shell. 
+6. Create a file that you wish to upload to your container, ex: c:\testuploadgile.log
+
+7.  Fill in and export these environment variables into your current shell. 
 
     ```
     export AZS_ARM_ENDPOINT={your AzureStack Resource Manager Endpoint}
@@ -41,17 +43,16 @@ check out the `main()` function in [app.go](app.go).
     export AZS_CLIENT_SECRET={your client secret}
     export AZS_CERT_PATH={your service principal certificate path}
     export AZS_SUBSCRIPTION_ID={your subscription id}
-    export AZS_STORAGE_ENDPOINT_SUFFIX={your storage endpoint suffix}
     export AZS_LOCATION={your resource location}
-    export AZS_BLOB_FILE_NAME={name of the file you want to upload to your container}
-    export AZS_FILE_ADDRESS={address of the file you want to upload to your container}
+    export AZS_BLOB_FILE_NAME={name of the file you want to upload to your container, ex: testuploadfile.log}
+    export AZS_FILE_ADDRESS={address of the file you want to upload to your container, ex: c:\testuploadgile.log}
     
     ```
 
-7.  Note that in order to run this sample on ADFS environments, use `tenantId` as the value of AZS_TENANT_ID environment variable.
+8.  Note that in order to run this sample on ADFS environments, use `tenantId` as the value of AZS_TENANT_ID environment variable.
 
 
-8. Run the sample.
+9. Run the sample.
 
     ```
     go run app.go

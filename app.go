@@ -19,7 +19,6 @@ var (
 	clientSecret          = os.Getenv("AZS_CLIENT_SECRET")
 	certPath              = os.Getenv("AZS_CERT_PATH")
 	subscriptionID        = os.Getenv("AZS_SUBSCRIPTION_ID")
-	storageEndpointSuffix = os.Getenv("AZS_STORAGE_ENDPOINT_SUFFIX")
 	location              = os.Getenv("AZS_LOCATION")
 	blobFileName          = os.Getenv("AZS_BLOB_FILE_NAME")
 	blobFileAddress       = os.Getenv("AZS_FILE_ADDRESS")
@@ -27,6 +26,7 @@ var (
 	storageAccountName   = fmt.Sprintf("samplestacc%s", strconv.Itoa(rand.Intn(1000)))
 	resourceGroupName    = fmt.Sprintf("stackrg%s", strconv.Itoa(rand.Intn(1000)))
 	storageContainerName = fmt.Sprintf("samplecontainer%s", strconv.Itoa(rand.Intn(1000)))
+	storageEndpointSuffix = strings.TrimRight(armEndpoint[strings.Index(armEndpoint, ".")+1:len(armEndpoint)], "/")
 )
 
 func main() {
