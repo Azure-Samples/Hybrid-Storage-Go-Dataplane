@@ -49,7 +49,7 @@ check out the `main()` function in [app.go](app.go).
     
     ```
 
-8.  Note that in order to run this sample on ADFS environments, use `tenantId` as the value of AZS_TENANT_ID environment variable.
+8.  Note that in order to run this sample on ADFS environments, use `adfs` as the value of AZS_TENANT_ID environment variable.
 
 
 9. Run the sample.
