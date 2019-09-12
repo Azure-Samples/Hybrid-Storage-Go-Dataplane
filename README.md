@@ -1,12 +1,11 @@
 ---
-topic: sample
+page_type: sample
 languages:
- - go
+- go
 products:
- - azure-sdks
-services: Azure-Stack
-platforms: GO
-author: seyadava
+- azure
+description: "The code provided shows how to do the following"
+urlFragment: Hybrid-Storage-Go-Dataplane
 ---
 
 # Hybrid-Storage-GO-Dataplane
