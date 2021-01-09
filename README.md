@@ -26,7 +26,7 @@ check out the `main()` function in [app.go](app.go).
 
 2.  Install Go SDK and its dependencies, [install Go SDK](https://github.com/azure/azure-sdk-for-go) 
 
-3. Install Go SDK dataplane, [install Go SDK Dataplane](https://github.com/Azure/azure-storage-blob-go/) 
+3.  Install Go SDK dataplane, [install Go SDK Dataplane](https://github.com/Azure/azure-storage-blob-go/) 
 
 4.  Clone the repository.
 
@@ -34,29 +34,37 @@ check out the `main()` function in [app.go](app.go).
     git clone https://github.com/Azure-Samples/Hybrid-Storage-Go-Dataplane.git
     ```
 
-5.  Create a [service principal using a certificate](https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-create-service-principals#create-a-service-principal-using-a-certificate) to work against AzureStack. Make sure your service principal has [contributor/owner role](https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-create-service-principals#assign-role-to-service-principal) on your subscription.
+5.  Move the Hybrid-Storage-Go-Dataplane folder to your $GOPATH/src folder.
 
-6. Create a file that you wish to upload to your container, ex: c:\testuploadgile.log
+6.  Open a Powershell or Bash shell in $GOPATH/src/Hybrid-Storage-Go-Dataplane and enter the following commands:
 
-7.  Fill in and export these environment variables into your current shell. 
+    ```
+    go mod init Hybrid-Storage-Go-Dataplane
+    go mod tidy
+    go get github.com/Azure/azure-storage-blob-go/azblob@v0.10.0
+    ```
+
+    NOTE: The azblob@v0.10.0 version is required for AzureStack.
+
+7.  Create a [service principal using a certificate](https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-create-service-principals#create-a-service-principal-using-a-certificate) to work against AzureStack. Make sure your service principal has [contributor/owner role](https://docs.microsoft.com/en-us/azure/azure-stack/azure-stack-create-service-principals#assign-role-to-service-principal) on your subscription.
+
+8.  Create a file that you wish to upload to your container, ex: c:\testuploadfile.log
+
+9.  Fill in and export these environment variables into your current shell. 
 
     ```
     export AZS_ARM_ENDPOINT={your AzureStack Resource Manager Endpoint}
     export AZS_TENANT_ID={your tenant id}
-    export AZS_CLIENT_ID={your client id}
-    export AZS_CLIENT_SECRET={your client secret}
-    export AZS_CERT_PATH={your service principal certificate path}
+    export AZS_CERT_CLIENT_ID={your service principal client id associated with a .pfx certificate file}
+    export AZS_PKCS12_PASSWORD={password for your .pfx file}
+    export AZS_PKCS12_CERT_PATH={path to your password protected .pfx file}
     export AZS_SUBSCRIPTION_ID={your subscription id}
     export AZS_LOCATION={your resource location}
     export AZS_BLOB_FILE_NAME={name of the file you want to upload to your container, ex: testuploadfile.log}
     export AZS_FILE_ADDRESS={address of the file you want to upload to your container, ex: c:\testuploadgile.log}
-    
     ```
 
-8.  Note that in order to run this sample on ADFS environments, use `adfs` as the value of AZS_TENANT_ID environment variable.
-
-
-9. Run the sample.
+10. Run the sample.
 
     ```
     go run app.go
