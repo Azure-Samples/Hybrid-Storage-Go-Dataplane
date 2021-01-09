@@ -35,7 +35,7 @@ func decodePkcs12(pkcs []byte, password string) (*x509.Certificate, *rsa.Private
 }
 
 // GetResourceManagementToken retrieves auth token
-func GetResourceManagementToken(tenantID, clientID, clientSecret, armEndpoint, certPath string) (adal.OAuthTokenProvider, error) {
+func GetResourceManagementToken(tenantID, clientID, certPass, armEndpoint, certPath string) (adal.OAuthTokenProvider, error) {
 	var token adal.OAuthTokenProvider
 	environment, err := azure.EnvironmentFromURL(armEndpoint)
 	if err != nil {
@@ -45,7 +45,7 @@ func GetResourceManagementToken(tenantID, clientID, clientSecret, armEndpoint, c
 	activeDirectoryEndpoint := environment.ActiveDirectoryEndpoint
 	oauthConfig, err := adal.NewOAuthConfig(activeDirectoryEndpoint, tenantID)
 	certData, err := ioutil.ReadFile(certPath)
-	certificate, rsaPrivateKey, err := decodePkcs12(certData, clientSecret)
+	certificate, rsaPrivateKey, err := decodePkcs12(certData, certPass)
 	if err != nil {
 		return nil, err
 	}
