@@ -3,35 +3,39 @@ package main
 import (
 	"context"
 	"fmt"
-	"math/rand"
-	"strconv"
-
 	"os"
+	"strings"
 
-	"./resources"
-	"./storage"
+	"Hybrid-Storage-Go-Dataplane/resources"
+	"Hybrid-Storage-Go-Dataplane/storage"
+
+	"github.com/Azure/go-autorest/autorest/azure"
 )
 
 var (
-	armEndpoint           = os.Getenv("AZS_ARM_ENDPOINT")
-	tenantID              = os.Getenv("AZS_TENANT_ID")
-	clientID              = os.Getenv("AZS_CLIENT_ID")
-	clientSecret          = os.Getenv("AZS_CLIENT_SECRET")
-	certPath              = os.Getenv("AZS_CERT_PATH")
-	subscriptionID        = os.Getenv("AZS_SUBSCRIPTION_ID")
-	location              = os.Getenv("AZS_LOCATION")
-	blobFileName          = os.Getenv("AZS_BLOB_FILE_NAME")
-	blobFileAddress       = os.Getenv("AZS_FILE_ADDRESS")
+	armEndpoint     = os.Getenv("AZURE_ARM_ENDPOINT")
+	tenantID        = os.Getenv("AZURE_TENANT_ID")
+	clientID        = os.Getenv("AZURE_SP_CERT_ID")
+	certPass        = os.Getenv("AZURE_SP_CERT_PASS")
+	certPath        = os.Getenv("AZURE_SP_CERT_PATH")
+	subscriptionID  = os.Getenv("AZURE_SUBSCRIPTION_ID")
+	location        = os.Getenv("AZURE_LOCATION")
+	blobFileAddress = os.Getenv("AZURE_SAMPLE_FILE_PATH")
 
-	storageAccountName   = fmt.Sprintf("samplestacc%s", strconv.Itoa(rand.Intn(1000)))
-	resourceGroupName    = fmt.Sprintf("stackrg%s", strconv.Itoa(rand.Intn(1000)))
-	storageContainerName = fmt.Sprintf("samplecontainer%s", strconv.Itoa(rand.Intn(1000)))
-	storageEndpointSuffix = strings.TrimRight(armEndpoint[strings.Index(armEndpoint, ".")+1:len(armEndpoint)], "/")
+	storageAccountName    = "samplestacc"
+	resourceGroupName     = "azure-sample-rg"
+	storageContainerName  = "samplecontainer"
+	storageEndpointSuffix = strings.TrimRight(armEndpoint[strings.Index(armEndpoint, ".")+1:], "/")
 )
 
 func main() {
 	cntx := context.Background()
-
+	environment, _ := azure.EnvironmentFromURL(armEndpoint)
+	splitEndpoint := strings.Split(environment.ActiveDirectoryEndpoint, "/")
+	splitEndpointlastIndex := len(splitEndpoint) - 1
+	if splitEndpoint[splitEndpointlastIndex] == "adfs" || splitEndpoint[splitEndpointlastIndex] == "adfs/" {
+		tenantID = "adfs"
+	}
 	//Create a resource group on Azure Stack
 	_, errRgStack := resources.CreateResourceGroup(
 		cntx,
@@ -41,7 +45,7 @@ func main() {
 		armEndpoint,
 		tenantID,
 		clientID,
-		clientSecret,
+		certPass,
 		subscriptionID)
 	if errRgStack != nil {
 		fmt.Println(errRgStack.Error())
@@ -52,7 +56,7 @@ func main() {
 	storageAccountClient := storage.GetStorageAccountsClient(
 		tenantID,
 		clientID,
-		clientSecret,
+		certPass,
 		armEndpoint,
 		certPath,
 		subscriptionID)
@@ -82,7 +86,6 @@ func main() {
 	uploadErr := storage.UploadDataToContainer(
 		cntx,
 		dataplaneURL,
-		blobFileName,
 		blobFileAddress)
 	if uploadErr != nil {
 		fmt.Println(uploadErr.Error())

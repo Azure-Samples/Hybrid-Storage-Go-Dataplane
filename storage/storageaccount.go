@@ -3,15 +3,16 @@ package storage
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
 
-	"log"
+	"Hybrid-Storage-Go-Dataplane/iam"
 
-	"../iam"
-
-	"github.com/Azure/azure-sdk-for-go/profiles/2018-03-01/storage/mgmt/storage"
-	"github.com/Azure/azure-storage-blob-go/2016-05-31/azblob"
+	"github.com/Azure/azure-sdk-for-go/profiles/2020-09-01/storage/mgmt/storage"
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/to"
 )
@@ -34,11 +35,14 @@ func getStorageAccountKey(cntx context.Context, storageAccountsClient storage.Ac
 }
 
 // UploadDataToContainer uploads data to a container
-func UploadDataToContainer(cntx context.Context, containerURL azblob.ContainerURL, blobFileName, blobFileAddress string) (err error) {
+func UploadDataToContainer(cntx context.Context, containerURL azblob.ContainerURL, blobFileAddress string) (err error) {
 	_, err = containerURL.Create(cntx, azblob.Metadata{}, azblob.PublicAccessNone)
 	if err != nil {
 		return fmt.Errorf("cannot create container: %v", err)
 	}
+	blobFileAddress = filepath.FromSlash(blobFileAddress)
+	blobFileAddressSplit := strings.Split(blobFileAddress, string(os.PathSeparator))
+	blobFileName := blobFileAddressSplit[len(blobFileAddressSplit)-1]
 	blobURL := containerURL.NewBlockBlobURL(blobFileName)
 	file, err := os.Open(blobFileAddress)
 	if err != nil {
@@ -56,7 +60,10 @@ func GetDataplaneURL(cntx context.Context, storageAccountsClient storage.Account
 	if err != nil {
 		return containerURL, fmt.Errorf("cannot get stroage account key: %v", err)
 	}
-	credential := azblob.NewSharedKeyCredential(storageAccountName, storageAccountKey)
+	credential, err := azblob.NewSharedKeyCredential(storageAccountName, storageAccountKey)
+	if err != nil {
+		return containerURL, fmt.Errorf("cannot create credential for storage account: %v", err)
+	}
 	pipeline := azblob.NewPipeline(credential, azblob.PipelineOptions{})
 	URL, err := url.Parse(fmt.Sprintf("https://%s.blob.%s/%s", storageAccountName, storageEndpointSuffix, storageContainerName))
 	if err != nil {
@@ -67,8 +74,8 @@ func GetDataplaneURL(cntx context.Context, storageAccountsClient storage.Account
 }
 
 // GetStorageAccountsClient creates a new storage account client
-func GetStorageAccountsClient(tenantID, clientID, clientSecret, armEndpoint, certPath, subscriptionID string) storage.AccountsClient {
-	token, err := iam.GetResourceManagementToken(tenantID, clientID, clientSecret, armEndpoint, certPath)
+func GetStorageAccountsClient(tenantID, clientID, certPass, armEndpoint, certPath, subscriptionID string) storage.AccountsClient {
+	token, err := iam.GetResourceManagementToken(tenantID, clientID, certPass, armEndpoint, certPath)
 	if err != nil {
 		log.Fatal(fmt.Sprintf(errorPrefix, fmt.Sprintf("Cannot generate token. Error details: %v.", err)))
 	}
@@ -98,13 +105,13 @@ func CreateStorageAccount(cntx context.Context, storageAccountsClient storage.Ac
 		storage.AccountCreateParameters{
 			Sku: &storage.Sku{
 				Name: storage.StandardLRS},
-			Location: to.StringPtr(location),
+			Location:                          to.StringPtr(location),
 			AccountPropertiesCreateParameters: &storage.AccountPropertiesCreateParameters{},
 		})
 	if err != nil {
 		return s, fmt.Errorf(fmt.Sprintf(errorPrefix, err))
 	}
-	err = future.WaitForCompletion(cntx, storageAccountsClient.Client)
+	err = future.WaitForCompletionRef(cntx, storageAccountsClient.Client)
 	if err != nil {
 		return s, fmt.Errorf(fmt.Sprintf(errorPrefix, fmt.Sprintf("cannot get the storage account create future response: %v", err)))
 	}
